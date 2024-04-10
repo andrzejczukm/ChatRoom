@@ -1,4 +1,5 @@
 <script>
+	import { onMount } from 'svelte';
 	import GoBack from '../../../components/GoBack.svelte';
 
 	/** @type {import('./$types').ActionData} */
@@ -6,16 +7,14 @@
 
 	$: caption = form?.caption ?? '';
 
-	const imageUrl =
-		'https://firebasestorage.googleapis.com/v0/b/chatroomtranslations.appspot.com/o/dog.jpg?alt=media&token=bd6446c5-bccd-4a46-9180-49c88bf138e6';
+	let files = [];
 </script>
 
 <GoBack />
 <main>
-	<img src={imageUrl} alt="dog" />
 	<div class="caption-container">
-		<form method="POST" action="?/caption">
-			<input type="text" name="imageUrl" value={imageUrl} hidden />
+		<form method="POST" action="?/caption" enctype="multipart/form-data">
+			<input type="file" name="imageInput" value="" bind:files />
 			<button type="submit">Generate caption</button>
 		</form>
 		{#if caption !== ''}
