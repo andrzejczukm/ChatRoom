@@ -46,6 +46,7 @@
 	form {
 		display: flex;
 		flex-direction: column;
+		color: blueviolet;
 		gap: 8px;
 	}
 
