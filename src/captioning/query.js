@@ -4,6 +4,9 @@ export default async function queryCaptioningModel(imageUrl) {
 	const data = await imageResponse.blob();
 	// query a model
 	const apiKey = import.meta.env.VITE_BLIP_API_KEY;
+	if (apiKey === undefined) {
+		return '';
+	}
 	const response = await fetch(
 		'https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-base',
 		{
