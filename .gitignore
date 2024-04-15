@@ -1,3 +1,4 @@
+# Svelte
 .DS_Store
 node_modules
 /build
@@ -9,4 +10,12 @@ node_modules
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+# Terraform
+.terraform
+*.tfstate
+
+# Firebase Private Key
+firebase-adminsdk.json
+
+# Other
 personal/

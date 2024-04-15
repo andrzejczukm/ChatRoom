@@ -13,14 +13,14 @@ terraform {
 provider "google-beta" {
   alias                 = "no_user_project_override"
   user_project_override = false
-  credentials = file("D:/school/Masters/sem1/Cloud/chatroomtranslations-firebase-adminsdk-78mo9-bdfcd5f2a7.json")
+  credentials = file("./firebase-adminsdk.json")
 }
 
 
 # Configure the provider that uses the new project's quota.
 provider "google-beta" {
   user_project_override = true
-  credentials = file("D:/school/Masters/sem1/Cloud/chatroomtranslations-firebase-adminsdk-78mo9-bdfcd5f2a7.json")
+  credentials = file("./firebase-adminsdk.json")
 }
 
 
