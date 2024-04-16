@@ -82,6 +82,19 @@ resource "google_project_service" "firebase" {
 }
 
 
+# Enable Firebase Realtime Database API.
+resource "google_project_service" "firebasedatabase" {
+  provider = google-beta.no_user_project_override
+
+  project = google_project.default.project_id
+  service = "firebasedatabase.googleapis.com"
+
+  # Don't disable the service if the resource block is removed by accident.
+  disable_on_destroy = false
+}
+
+
+# Reference the firebase project
 resource "google_firebase_project" "default" {
   provider = google-beta
   project = google_project.default.project_id
@@ -101,5 +114,22 @@ resource "google_firebase_web_app" "rtdb" {
   # Wait for Firebase to be enabled in the Google Cloud project before creating this App.
   depends_on = [
     google_firebase_project.default,
+  ]
+}
+
+
+# Provisions the default Realtime Database default instance.
+resource "google_firebase_database_instance" "database" {
+  provider    = google-beta
+  project     = google_project.default.project_id
+  region      = "europe-west1"
+  # This value will become the first segment of the database's URL.
+  instance_id = "${google_project.default.project_id}-default-rtdb"
+  type        = "DEFAULT_DATABASE"
+
+  # Wait for Firebase to be enabled in the Google Cloud project before initializing Realtime Database.
+  depends_on = [
+    google_firebase_project.default,
+    google_project_service.firebasedatabase,
   ]
 }
