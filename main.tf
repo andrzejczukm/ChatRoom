@@ -30,13 +30,13 @@ provider "google-beta" {
 # import existing gcloud project
 import {
   to = google_project.default
-  id = "chatroomcloud"
+  id = "chatroomterraform0"
 }
 
 
 resource "google_project" "default" {
   provider = google-beta.no_user_project_override
-  project_id      = "chatroomcloud"
+  project_id      = "chatroomterraform0"
   name            = "ChatRoomTerraform"
 
   # Required for the project to display in any list of Firebase projects.
@@ -47,15 +47,15 @@ resource "google_project" "default" {
 
 
 # Enables Cloud Resource Manager API.
-# resource "google_project_service" "cloudresourcemanager" {
-#   provider = google-beta.no_user_project_override
+resource "google_project_service" "cloudresourcemanager" {
+  provider = google-beta.no_user_project_override
 
-#   project  = google_project.default.project_id
-#   service = "cloudresourcemanager.googleapis.com"
+  project  = google_project.default.project_id
+  service = "cloudresourcemanager.googleapis.com"
 
-#   # Don't disable the service if the resource block is removed by accident.
-#   disable_on_destroy = false
-# }
+  # Don't disable the service if the resource block is removed by accident.
+  disable_on_destroy = false
+}
 
 
 # Enable the required underlying Service Usage API.
@@ -79,6 +79,10 @@ resource "google_project_service" "firebase" {
 
   # Don't disable the service if the resource block is removed by accident.
   disable_on_destroy = false
+
+  depends_on = [ 
+    google_project_service.serviceusage,
+  ]
 }
 
 
@@ -91,13 +95,41 @@ resource "google_project_service" "firebasedatabase" {
 
   # Don't disable the service if the resource block is removed by accident.
   disable_on_destroy = false
+
+  depends_on = [ 
+    google_project_service.firebase,
+  ]
 }
 
 
-# Reference the firebase project
+# Enables required APIs for Cloud Storage in Firebase
+resource "google_project_service" "firebasestorage" {
+  provider = google-beta.no_user_project_override
+  project  = google_project.default.project_id
+  for_each = toset([
+    "firebaserules.googleapis.com",
+    "firebasestorage.googleapis.com",
+    "storage.googleapis.com",
+  ])
+  service = each.key
+
+  # Don't disable the service if the resource block is removed by accident.
+  disable_on_destroy = false
+
+  depends_on = [ 
+    google_project_service.firebase,
+  ]
+}
+
+
+# Enable Firebase services
 resource "google_firebase_project" "default" {
   provider = google-beta
   project = google_project.default.project_id
+
+  depends_on = [ 
+    google_project_service.firebase, 
+  ]
 }
 
 
@@ -133,3 +165,21 @@ resource "google_firebase_database_instance" "database" {
     google_project_service.firebasedatabase,
   ]
 }
+
+
+# Creates a ruleset of Cloud Storage Security Rules from a local file.
+# resource "google_firebaserules_ruleset" "storage" {
+#   provider = google-beta
+#   project  = google_project.default.project_id
+#   source {
+#     files {
+#       name    = "storage.rules"
+#       content = file("firebase_rules/storage.rules")
+#     }
+#   }
+
+#   # Wait for the default Storage bucket to be provisioned before creating this ruleset.
+#   depends_on = [
+#     google_firebase_project.default,
+#   ]
+# }
