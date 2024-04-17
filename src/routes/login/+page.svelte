@@ -1,4 +1,20 @@
 <script>
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { logInUser, registerUser, getLoggedInUser } from '../../database/auth';
+
+	let displayPage = false;
+
+	onMount(() => {
+		const user = getLoggedInUser();
+		if (user !== null) {
+			// redirect a user if already logged in
+			goto('/');
+		} else {
+			displayPage = true;
+		}
+	});
+
 	// login or register
 	let isLogin = true;
 	let alertMessage = '';
@@ -8,79 +24,86 @@
 	let passwordRepeat = '';
 
 	function changeAuthType() {
+		alertMessage = '';
 		isLogin = !isLogin;
 	}
 
-	function handleSubmit() {
+	async function handleSubmit() {
 		if (isLogin) {
-			logIn();
+			await logIn();
 		} else {
-			register();
+			await register();
 		}
 	}
 
-	function logIn() {
-		console.log('logging in');
-		//TODO: implement when authentication works
+	async function logIn() {
+		try {
+			await logInUser(email, password);
+			// redirect after successful logIn
+			goto('/');
+		} catch (err) {
+			alertMessage = err.message;
+		}
 	}
 
-	function register() {
+	async function register() {
 		if (password !== passwordRepeat) {
 			alertMessage = 'Passwords must match';
 			return;
 		}
 		if (password.length < 6) {
-			alertMessage = 'Password should contain at least 6 characters';
+			alertMessage = 'Password should be at least 6 characters';
 			return;
 		}
-		console.log('registering');
-		//TODO: implement when authentication works
+		try {
+			await registerUser(email, password);
+			// redirect after successful register
+			goto('/');
+		} catch (err) {
+			alertMessage = err.message;
+		}
 	}
 </script>
 
-<div class="auth-container">
-	<div class="form-container">
-		<form on:submit|preventDefault={handleSubmit} class="auth-form">
-			<header class="form-header">
-				<h2>{isLogin ? 'Login' : 'Register'}</h2>
-			</header>
+{#if displayPage}
+	<div class="auth-container">
+		<div class="form-container">
+			<form on:submit|preventDefault={handleSubmit} class="auth-form">
+				<header class="form-header">
+					<h2>{isLogin ? 'Login' : 'Register'}</h2>
+				</header>
 
-			<div class="form-input">
-				<label for="email">Email</label>
-				<input id="email" type="email" bind:value={email} required />
-			</div>
-
-			<div class="form-input">
-				<label for="password">Password</label>
-				<input id="password" bind:value={password} type="password" required />
-			</div>
-
-			{#if !isLogin}
 				<div class="form-input">
-					<label class="auth-label" for="repeat">Repeat password</label>
-					<input
-						class="auth-input"
-						id="repeat"
-						bind:value={passwordRepeat}
-						type="password"
-						required
-					/>
+					<label for="email">Email</label>
+					<input id="email" type="email" bind:value={email} required />
 				</div>
-			{/if}
 
-			{#if alertMessage !== ''}
-				<span class="auth-error">{alertMessage}</span>
-			{/if}
+				<div class="form-input">
+					<label for="password">Password</label>
+					<input id="password" bind:value={password} type="password" required />
+				</div>
 
-			<button type="submit" class="login-btn">
-				{isLogin ? 'Log in' : 'Register'}
-			</button>
-			<button type="reset" on:click={changeAuthType} class="change-auth">
-				{isLogin ? "I don't have an account yet" : 'I have an account already'}
-			</button>
-		</form>
+				{#if !isLogin}
+					<div class="form-input">
+						<label class="auth-label" for="repeat">Repeat password</label>
+						<input id="repeat" bind:value={passwordRepeat} type="password" required />
+					</div>
+				{/if}
+
+				{#if alertMessage !== ''}
+					<span class="auth-error">{alertMessage}</span>
+				{/if}
+
+				<button type="submit" class="login-btn">
+					{isLogin ? 'Log in' : 'Register'}
+				</button>
+				<button type="reset" on:click={changeAuthType} class="change-auth">
+					{isLogin ? "I don't have an account yet" : 'I have an account already'}
+				</button>
+			</form>
+		</div>
 	</div>
-</div>
+{/if}
 
 <style>
 	h2 {
@@ -126,12 +149,12 @@
 
 	.form-input input {
 		border: none;
-		border-radius: 2px;
+		border-radius: 6px;
 		padding: 6px;
 	}
 
 	.auth-error {
-		font-size: small;
+		font-size: 0.875em;
 		color: red;
 	}
 
