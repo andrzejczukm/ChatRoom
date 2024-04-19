@@ -1,4 +1,11 @@
 body {
-	background-color: #b1cab5; /* #d4a3a3ef;*/
-  font-family: Roboto; /* Monospace;*/
+	background-color: whitesmoke; /* #b1cab5;  #d4a3a3ef;  #b1cab5*/
+	font-family: Roboto; /* Monospace;*/
+	padding: 0;
+	margin: 0;
+	min-height: 100vh;
+}
+
+html {
+	min-height: 100%;
 }
