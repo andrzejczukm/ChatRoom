@@ -24,7 +24,7 @@
 	header {
 		background-color: whitesmoke;
 		position: sticky;
-    border-radius: 20px;
+		margin-bottom: 0;
 	}
 
 	.header-right {
@@ -49,7 +49,8 @@
 		font-weight: bold;
 	}
 	.links a:hover {
-		color: rgb(117, 117, 117);
+		color: #709692;
+		/* rgb(117, 117, 117); */
 		transition: background-color 0.3s ease;
 	}
 
@@ -57,7 +58,9 @@
 		background-color: whitesmoke;
 		padding: 20px 0;
 		text-align: center;
-    border-radius: 20px;
+		position: absolute;
+		bottom: 0;
+		width: 100%;
 	}
 
 	.footer-content {
