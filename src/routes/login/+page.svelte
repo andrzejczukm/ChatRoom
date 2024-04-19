@@ -34,6 +34,7 @@
 		} else {
 			await register();
 		}
+		location.reload();
 	}
 
 	async function logIn() {
@@ -168,10 +169,11 @@
 	}
 
 	button.login-btn {
-		background-color: #b1cab5;
+		background-color: #709692;
 		border: none;
 		border-radius: 6px;
 		padding: 12px 0;
 		cursor: pointer;
+		color: whitesmoke;
 	}
 </style>
