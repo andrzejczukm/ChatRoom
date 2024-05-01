@@ -65,6 +65,11 @@ export async function registerUser(email, password) {
 			uid: user.uid,
 		});
 
+		// initialise empty chat list
+		await setDoc(doc(db, `users/${user.uid}`), {
+			chatRooms: [],
+		});
+
 		// store user's data in the local storage
 		const defaultDisplayName = getDefaultDisplayName(email);
 		storeLoggedInUser(user.uid, email, defaultDisplayName);
