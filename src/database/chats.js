@@ -18,7 +18,7 @@ const chatRoomsCollection = collection(db, 'chatRooms');
  * @param {function} onChatsCallback
  * @returns {function} an unsubscribe function
  */
-export function listenChatsForUser(userUid, onChatsCallback) {
+export function subscribeUserChats(userUid, onChatsCallback) {
 	const userChatsQuery = query(chatRoomsCollection, where('members', 'array-contains', userUid));
 	const unsubscribe = onSnapshot(userChatsQuery, (snapshot) => {
 		if (snapshot.empty) {

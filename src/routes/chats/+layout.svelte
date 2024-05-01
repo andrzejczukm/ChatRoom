@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { onDestroy, onMount } from 'svelte';
 	import { getLoggedInUser } from '../../database/auth';
-	import { listenChatsForUser, createChatRoom } from '../../database/chats';
+	import { subscribeUserChats, createChatRoom } from '../../database/chats';
 	import ChatTile from '../../components/ChatTile.svelte';
 	import Spinner from '../../components/shared/Spinner.svelte';
 
@@ -23,7 +23,7 @@
 			goto('/login');
 		} else {
 			createChatBtnDisabled = false;
-			unsubscribeUserChats = listenChatsForUser(user.id, (newChatsData) => {
+			unsubscribeUserChats = subscribeUserChats(user.id, (newChatsData) => {
 				chats = newChatsData;
 			});
 		}

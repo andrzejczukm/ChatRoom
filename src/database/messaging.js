@@ -1,37 +1,27 @@
-import { database } from './config';
-import { onValue, ref, set, child } from 'firebase/database';
+import { db } from './config';
+import { onSnapshot, collection } from 'firebase/firestore';
 
-const messagesRef = ref(database, 'test/messages');
-
-export function subscribeToMessages(onMessagesCallback) {
-	const unsubscribe = onValue(messagesRef, (snapshot) => {
-		if (!snapshot.exists()) {
+export function subscribeChatMessages(chatId, onMessagesCallback) {
+	const chatMessagesCollection = collection(db, 'chatsMessages', chatId, 'messages');
+	const unsubscribe = onSnapshot(chatMessagesCollection, (snapshot) => {
+		if (snapshot.empty) {
 			onMessagesCallback([]);
 			return;
 		}
-		const fetchedMessages = snapshot.val();
-		const messagesObjects = Object.entries(fetchedMessages).map(([id, data]) => ({
-			id,
-			...data,
+		const messagesData = snapshot.docs.map((messageDoc) => ({
+			id: messageDoc.id,
+			userId: messageDoc.get('userId'),
+			timestamp: messageDoc.get('timestamp'),
+			type: messageDoc.get('type'),
+			content: messageDoc.get('content'),
+			fileId: messageDoc.get('fileId'),
 		}));
-		onMessagesCallback(messagesObjects);
+		messagesData.sort((c1, c2) => c1.timestamp - c2.timestamp);
+		onMessagesCallback(messagesData);
 	});
 	return unsubscribe;
 }
 
 export async function sendTextMessage(userId, messageContent) {
-	const timestamp = Date.now().valueOf().toString();
-	const messageId = timestamp;
-	const newMessage = {
-		userId: userId,
-		timestamp: messageId,
-		content: messageContent,
-		type: 'text',
-	};
-	const newMessageRef = child(messagesRef, messageId);
-	await set(newMessageRef, newMessage);
-}
-
-export async function clearMessages() {
-	await set(messagesRef, null);
+	// TODO: implement this
 }
