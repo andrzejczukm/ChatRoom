@@ -1,9 +1,9 @@
 <script>
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { getLoggedInUser } from '../../database/auth';
-	import { getChatsForUser, createChatRoom } from '../../database/chats';
+	import { listenChatsForUser, createChatRoom } from '../../database/chats';
 	import ChatTile from '../../components/ChatTile.svelte';
 	import Spinner from '../../components/shared/Spinner.svelte';
 
@@ -14,21 +14,28 @@
 	// undefined if no chat is clicked
 	$: selectedChat = $page.params.chatId;
 
-	onMount(async () => {
+	let unsubscribeUserChats = () => {};
+
+	onMount(() => {
 		user = getLoggedInUser();
 		if (user === null) {
 			// redirect a user if not logged in
 			goto('/login');
 		} else {
 			createChatBtnDisabled = false;
-			chats = await getChatsForUser(user.id);
+			unsubscribeUserChats = listenChatsForUser(user.id, (newChatsData) => {
+				chats = newChatsData;
+			});
 		}
+	});
+
+	onDestroy(() => {
+		unsubscribeUserChats();
 	});
 
 	async function handleCreateChat() {
 		createChatBtnDisabled = true;
 		const newChatId = await createChatRoom(user.id);
-		chats = await getChatsForUser(user.id);
 		goto(`/chats/${newChatId}`);
 		createChatBtnDisabled = false;
 	}
@@ -101,11 +108,11 @@
 		gap: 16px;
 		margin-top: 16px;
 		padding-right: 4px;
-		max-height: calc(100vh - 80.875px - 6px - 34px - 16px);
+		height: calc(100vh - 80.875px - 6px - 34px - 16px - 59px);
 	}
 
 	main {
-		max-height: calc(100vh - 80.875px - 6px);
+		height: calc(100vh - 80.875px - 6px - 59px);
 	}
 
 	.chat-list-container,

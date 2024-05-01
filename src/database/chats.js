@@ -1,17 +1,5 @@
-import { auth, db } from './config';
-import {
-	collection,
-	doc,
-	addDoc,
-	setDoc,
-	updateDoc,
-	getDoc,
-	getDocs,
-	query,
-	where,
-	Timestamp,
-	arrayUnion,
-} from 'firebase/firestore';
+import { db } from './config';
+import { collection, addDoc, onSnapshot, query, where, Timestamp } from 'firebase/firestore';
 
 const chatRoomsCollection = collection(db, 'chatRooms');
 
@@ -24,39 +12,29 @@ const chatRoomsCollection = collection(db, 'chatRooms');
  */
 
 /**
+ * Subscibe to changes in user's chats.
+ *
  * @param {string} userUid
- * @returns {Promise<ChatRoom[]>}
+ * @param {function} onChatsCallback
+ * @returns {function} an unsubscribe function
  */
-export async function getChatsForUser(userUid) {
-	const userData = await getDoc(doc(db, `users/${userUid}`));
-	if (!userData.exists()) {
-		// the user does not belong to any chat
-		return [];
-	}
-	const userChatsIds = userData.get('chatRooms');
-	if (userChatsIds.length === 0) {
-		return [];
-	}
-
-	let result = [];
-	// split userChatsIds into chunks to be able to use it with queries
-	// as they require arrays with up to 30 elements
-	const chunkSize = 30;
-	for (let i = 0; i < userChatsIds.length; i += chunkSize) {
-		const userChatsIdsChunk = userChatsIds.slice(i, i + chunkSize);
-		const newChatsDocs = await getDocs(
-			query(chatRoomsCollection, where('__name__', 'in', userChatsIdsChunk))
-		);
-		const newChatsData = newChatsDocs.docs.map((chatDoc) => ({
+export function listenChatsForUser(userUid, onChatsCallback) {
+	const userChatsQuery = query(chatRoomsCollection, where('members', 'array-contains', userUid));
+	const unsubscribe = onSnapshot(userChatsQuery, (snapshot) => {
+		if (snapshot.empty) {
+			onChatsCallback([]);
+			return;
+		}
+		const chatsData = snapshot.docs.map((chatDoc) => ({
 			id: chatDoc.id,
 			name: chatDoc.get('name'),
 			lastMessage: chatDoc.get('lastMessage'),
 			lastMessageTimestamp: chatDoc.get('lastMessageTimestamp'),
 		}));
-		result.push(...newChatsData);
-	}
-	result.sort((chat1, chat2) => chat1.lastMessageTimestamp - chat2.lastMessageTimestamp);
-	return result;
+		chatsData.sort((c1, c2) => c2.lastMessageTimestamp - c1.lastMessageTimestamp);
+		onChatsCallback(chatsData);
+	});
+	return unsubscribe;
 }
 
 /**
@@ -71,17 +49,10 @@ export async function createChatRoom(userUid) {
 		name: 'New chat room',
 		lastMessage: '',
 		lastMessageTimestamp: Timestamp.fromDate(new Date()),
-	});
-	const chatId = newChatDoc.id;
-	// Add the creator as a member and administrator
-	await setDoc(doc(db, `members/${chatId}`), {
 		administrators: [userUid],
 		members: [userUid],
 	});
-	// Add the chat to user's chats
-	await updateDoc(doc(db, `users/${userUid}`), {
-		chatRooms: arrayUnion(chatId),
-	});
+	const chatId = newChatDoc.id;
 	// Return the new chat ID
 	return chatId;
 }
