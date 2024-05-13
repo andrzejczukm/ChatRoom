@@ -33,6 +33,7 @@
 	</div>
 </header>
 <slot />
+
 <footer>
 	<div class="footer-content">
 		<p>© 2024 Chat Room. Project created for Cloud Computing.</p>
