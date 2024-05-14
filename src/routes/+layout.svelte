@@ -25,8 +25,10 @@
 			<a class="active" href="/chats">Chat</a>
 			<a href="/catalog">Catalog</a>
 			{#if user !== null}
+				<a href="/profile">Profile</a>
 				<button on:click={logOut}>Logout</button>
 			{:else}
+				<a href="/login">Profile</a>
 				<a href="/login">Login</a>
 			{/if}
 		</div>
