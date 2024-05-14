@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { onDestroy, onMount } from 'svelte';
 	import { getLoggedInUser } from '../../../database/auth';
+	import { updateUsernameInChat } from '../../../database/chats';
 	import { subscribeChatMessages } from '../../../database/messaging';
 	import Spinner from '../../../components/shared/Spinner.svelte';
 
@@ -22,16 +23,25 @@
 
 	let messages = null;
 
-	function setMessagesListener(chatId) {
+	/**
+	 * Fires when a user switches between the chats
+	 * @param chatId currently viewed chat
+	 */
+	async function onChatChanged(chatId) {
 		// unsubscribe from the previous chat
 		unsubscribeMessages();
 		// subscribe to chat messages
 		unsubscribeMessages = subscribeChatMessages(chatId, (newMessages) => {
 			messages = newMessages;
 		});
+		// update username within the chat
+		if (user !== null) {
+			console.log(chatId);
+			await updateUsernameInChat(chatId, user.id, user.displayName);
+		}
 	}
 
-	$: setMessagesListener(currentChatId);
+	$: onChatChanged(currentChatId);
 </script>
 
 {#if user !== null}
