@@ -1,5 +1,5 @@
 import { db } from './config';
-import { onSnapshot, collection } from 'firebase/firestore';
+import { onSnapshot, collection, addDoc, Timestamp } from 'firebase/firestore';
 
 export function subscribeChatMessages(chatId, onMessagesCallback) {
 	const chatMessagesCollection = collection(db, 'chatsMessages', chatId, 'messages');
@@ -22,6 +22,18 @@ export function subscribeChatMessages(chatId, onMessagesCallback) {
 	return unsubscribe;
 }
 
-export async function sendTextMessage(userId, messageContent) {
-	// TODO: implement this
+/**
+ * Creates a message
+ * @param {string} chatId
+ * @param {string} userId
+ * @param {string} messageContent
+ */
+export async function sendTextMessage(chatId, userId, messageContent) {
+	const chatMessagesCollection = collection(db, 'chatsMessages', chatId, 'messages');
+	await addDoc(chatMessagesCollection, {
+		userId: userId,
+		timestamp: Timestamp.fromDate(new Date()),
+		type: 'text',
+		content: messageContent,
+	});
 }
