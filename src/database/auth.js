@@ -5,7 +5,7 @@ import {
 	updateProfile,
 } from 'firebase/auth';
 import { auth, db } from './config';
-import { setDoc, doc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc } from 'firebase/firestore';
 
 /**
  * @typedef UserData
@@ -42,19 +42,12 @@ export function getLoggedInUser() {
 }
 
 /**
- * @param {string} email
- * @returns user's display name formed from an email: e.g. "john.doe@email.com" -> "john doe"
- */
-function getDefaultDisplayName(email) {
-	return email.split('@')[0].replace('.', ' ');
-}
-
-/**
  * Registers user. If an error occurs, error.message will contain feedback
  * @param {string} email
  * @param {string} password
+ * @param {string} displayName
  */
-export async function registerUser(email, password) {
+export async function registerUser(email, password, displayName) {
 	try {
 		// this line will throw an error when user's creation fails
 		const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -66,11 +59,10 @@ export async function registerUser(email, password) {
 		});
 
 		// store user's data in the local storage
-		const defaultDisplayName = getDefaultDisplayName(email);
-		storeLoggedInUser(user.uid, email, defaultDisplayName);
+		storeLoggedInUser(user.uid, email, displayName);
 
 		// set default display name for the user
-		updateProfile(user, { displayName: defaultDisplayName });
+		await updateProfile(user, { displayName });
 	} catch (err) {
 		switch (err.code) {
 			case 'auth/email-already-in-use':
@@ -107,4 +99,20 @@ export async function logInUser(email, password) {
 export async function logOutUser() {
 	await signOut(auth);
 	clearLoggedInUser();
+}
+
+/**
+ * Updates the display name of the user.
+ * @param {string} id The UID of the user whose display name is to be updated.
+ * @param {string} newDisplayName The new display name to set.
+ */
+export async function updateUserDisplayName(newDisplayName) {
+	try {
+		const user = auth.currentUser;
+		await updateProfile(user, { displayName: newDisplayName });
+		storeLoggedInUser(user.uid, user.email, newDisplayName);
+	} catch (err) {
+		console.error("Error updating user's display name:", err.message);
+		throw new Error('Failed to update user display name');
+	}
 }

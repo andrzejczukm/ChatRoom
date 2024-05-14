@@ -22,6 +22,7 @@
 	let email = '';
 	let password = '';
 	let passwordRepeat = '';
+	let displayName = '';
 
 	function changeAuthType() {
 		alertMessage = '';
@@ -57,7 +58,7 @@
 			return;
 		}
 		try {
-			await registerUser(email, password);
+			await registerUser(email, password, displayName);
 			// redirect after successful register
 			goto('/');
 		} catch (err) {
@@ -78,6 +79,13 @@
 					<label for="email">Email</label>
 					<input id="email" type="email" bind:value={email} required />
 				</div>
+
+				{#if !isLogin}
+					<div class="form-input">
+						<label class="displayName" for="repeat">Display name</label>
+						<input id="displayName" bind:value={displayName} type="displayName" required />
+					</div>
+				{/if}
 
 				<div class="form-input">
 					<label for="password">Password</label>
