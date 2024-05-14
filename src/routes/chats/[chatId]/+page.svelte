@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { onDestroy, onMount } from 'svelte';
 	import { getLoggedInUser } from '../../../database/auth';
-	import { updateUsernameInChat } from '../../../database/chats';
+	import { updateUsernameInChat, getChatMembersIdsToNamesMap } from '../../../database/chats';
 	import { subscribeChatMessages, sendTextMessage } from '../../../database/messaging';
 	import Spinner from '../../../components/shared/Spinner.svelte';
 
@@ -34,6 +34,7 @@
 	});
 
 	let messages = null;
+	let userDictionary = null;
 
 	/**
 	 * Fires when a user switches between the chats
@@ -48,16 +49,16 @@
 		});
 		// update username within the chat
 		if (user !== null) {
-			console.log(chatId);
 			await updateUsernameInChat(chatId, user.id, user.displayName);
 		}
+		userDictionary = await getChatMembersIdsToNamesMap(chatId);
 	}
 
 	$: onChatChanged(currentChatId);
 </script>
 
 {#if user !== null}
-	{#if messages === null}
+	{#if messages === null || userDictionary === null}
 		<div class="spinner-container">
 			<Spinner />
 		</div>
@@ -66,19 +67,19 @@
 		<div class="messages-container">
 			{#each messages as message}
 				<div class="message">
-					<p><strong>{message.userId}</strong>: {message.content}</p>
+					<p><strong>{userDictionary.get(message.userId)}</strong>: {message.content}</p>
 				</div>
 			{/each}
 		</div>
-		<div class="input-field">
+		<form class="input-field" on:submit|preventDefault={sendMessage}>
 			<textarea
 				type="text"
 				id="new-username"
 				bind:value={messageText}
 				placeholder="Write a message..."
 			/>
-			<button on:click={sendMessage}>send</button>
-		</div>
+			<button type="submit">send</button>
+		</form>
 	{/if}
 {/if}
 
