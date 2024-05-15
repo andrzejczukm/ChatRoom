@@ -93,6 +93,24 @@ export async function createChatRoom(userUid) {
 }
 
 /**
+ * Adds the user to the chat room
+ * @param {string} chatId
+ * @param {string} userUid
+ * @returns {Promise<string | null>} The ID of the chat room, or null if
+ * there is no chat room with specified ID
+ */
+export async function joinChatRoom(chatId, userId) {
+	try {
+		await updateDoc(doc(chatRoomsCollection, chatId), {
+			members: arrayUnion(userId),
+		});
+		return chatId;
+	} catch (e) {
+		return null;
+	}
+}
+
+/**
  * Refresh user's name within the chat
  * @param {string} chatId
  * @param {string} userId

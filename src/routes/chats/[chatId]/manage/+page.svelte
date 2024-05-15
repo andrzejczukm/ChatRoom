@@ -145,12 +145,6 @@
 		cursor: pointer;
 	}
 
-	.icon-btn {
-		background-color: transparent;
-		padding: 0;
-		border: none;
-	}
-
 	.btn {
 		font-size: 1em;
 		border: 2px solid #709692;

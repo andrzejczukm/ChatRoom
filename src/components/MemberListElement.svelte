@@ -1,6 +1,6 @@
 <script>
 	import { demoteChatMember, promoteChatMember, removeChatMember } from '../database/chats';
-	import ConfirmationDialog from './ConfirmationDialog.svelte';
+	import ConfirmationDialog from './shared/dialogs/ConfirmationDialog.svelte';
 
 	export let isUserAdmin;
 	export let canBeDemoted;
@@ -13,14 +13,17 @@
 
 	async function handlePromote() {
 		await promoteChatMember(chatId, memberId);
+		return true;
 	}
 
 	async function handleDemote() {
 		await demoteChatMember(chatId, memberId);
+		return true;
 	}
 
 	async function handleRemoveMember() {
 		await removeChatMember(chatId, memberId);
+		return true;
 	}
 </script>
 

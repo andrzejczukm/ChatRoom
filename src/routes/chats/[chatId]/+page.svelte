@@ -15,6 +15,7 @@
 	onMount(() => {
 		user = getLoggedInUser();
 		// redirects are handled by +layout.svelte
+		updateUsernameInChat(currentChatId, user.id, user.displayName);
 	});
 
 	onDestroy(() => {
