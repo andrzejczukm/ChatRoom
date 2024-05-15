@@ -11,3 +11,10 @@ body {
 html {
 	min-height: 100%;
 }
+
+.icon-btn {
+	background-color: transparent;
+	padding: 0;
+	border: none;
+	cursor: pointer;
+}

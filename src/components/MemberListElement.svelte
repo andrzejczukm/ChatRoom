@@ -1,6 +1,6 @@
 <script>
 	import { demoteChatMember, promoteChatMember, removeChatMember } from '../database/chats';
-	import ConfirmationDialog from './ConfirmationDialog.svelte';
+	import ConfirmationDialog from './shared/dialogs/ConfirmationDialog.svelte';
 
 	export let isUserAdmin;
 	export let canBeDemoted;
