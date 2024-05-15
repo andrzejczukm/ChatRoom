@@ -13,17 +13,14 @@
 
 	async function handlePromote() {
 		await promoteChatMember(chatId, memberId);
-		return true;
 	}
 
 	async function handleDemote() {
 		await demoteChatMember(chatId, memberId);
-		return true;
 	}
 
 	async function handleRemoveMember() {
 		await removeChatMember(chatId, memberId);
-		return true;
 	}
 </script>
 
