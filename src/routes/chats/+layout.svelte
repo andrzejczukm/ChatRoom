@@ -115,8 +115,7 @@
 		height: calc(100vh - 80.875px - 6px - 59px);
 	}
 
-	.chat-list-container,
-	main {
+	.chat-list-container {
 		overflow-y: scroll;
 	}
 
