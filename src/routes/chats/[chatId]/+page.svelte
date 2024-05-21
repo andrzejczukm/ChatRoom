@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { onDestroy, onMount } from 'svelte';
 	import { getLoggedInUser } from '../../../database/auth';
-	import { updateUsernameInChat, getChatMembersIdsToNamesMap } from '../../../database/chats';
+	import { updateUsernameInChat, getChatRoomData } from '../../../database/chats';
 	import { subscribeChatMessages, sendTextMessage } from '../../../database/messaging';
 	import Spinner from '../../../components/shared/Spinner.svelte';
 
@@ -35,40 +35,75 @@
 	});
 
 	let messages = null;
-	let userDictionary = null;
+	let chatData = null;
+
+	// messages pagination
+	let pageSize = 40;
+	let currentDisplayedMessages = pageSize;
+	let isMoreMessagesLoading = false;
+
+	function onNewMessages(newMessages) {
+		messages = newMessages;
+		isMoreMessagesLoading = false;
+	}
 
 	/**
 	 * Fires when a user switches between the chats
 	 * @param chatId currently viewed chat
 	 */
 	async function onChatChanged(chatId) {
-		// unsubscribe from the previous chat
+		// unsubscribe from the previous chat, reset chatData and pagination
 		unsubscribeMessages();
+		chatData = null;
+		currentDisplayedMessages = pageSize;
 		// subscribe to chat messages
-		unsubscribeMessages = subscribeChatMessages(chatId, (newMessages) => {
-			messages = newMessages;
-		});
+		unsubscribeMessages = subscribeChatMessages(chatId, currentDisplayedMessages, onNewMessages);
 		// update username within the chat
 		if (user !== null) {
 			await updateUsernameInChat(chatId, user.id, user.displayName);
 		}
-		userDictionary = await getChatMembersIdsToNamesMap(chatId);
+		// refresh chat room data
+		chatData = await getChatRoomData(chatId);
+	}
+
+	function loadMoreMessages() {
+		isMoreMessagesLoading = true;
+		// unsubscribe from listener with more messages
+		unsubscribeMessages();
+		// subscribe with a greater page size
+		currentDisplayedMessages += pageSize;
+		unsubscribeMessages = subscribeChatMessages(
+			currentChatId,
+			currentDisplayedMessages,
+			onNewMessages
+		);
 	}
 
 	$: onChatChanged(currentChatId);
 </script>
 
 {#if user !== null}
-	{#if messages === null || userDictionary === null}
+	{#if messages === null || chatData === null}
 		<div class="spinner-container">
 			<Spinner />
 		</div>
 	{:else}
 		<p>{currentChatId}</p>
 		<div class="messages-container">
+			{#if isMoreMessagesLoading || messages.length === currentDisplayedMessages}
+				<div class="load-more-container">
+					{#if isMoreMessagesLoading}
+						<Spinner radius={13} />
+					{:else}
+						<button class="btn btn-primary" on:click={loadMoreMessages}>Load more messages</button>
+					{/if}
+				</div>
+			{/if}
 			{#each messages as message}
 				<div class="message">
-					<p><strong>{userDictionary.get(message.userId)}</strong>: {message.content}</p>
+					<p>
+						<strong>{chatData.membersIdsToNames.get(message.userId)}</strong>: {message.content}
+					</p>
 				</div>
 			{/each}
 		</div>
@@ -90,6 +125,14 @@
 		height: calc(100vh - 80.875px - 6px - 59px - 170px);
 		padding-bottom: 10px;
 	}
+
+	.load-more-container {
+		width: 100%;
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+	}
+
 	.spinner-container {
 		width: 100%;
 		display: flex;

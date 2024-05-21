@@ -141,28 +141,6 @@
 		font-weight: bolder;
 	}
 
-	button {
-		cursor: pointer;
-	}
-
-	.btn {
-		font-size: 1em;
-		border: 2px solid #709692;
-		border-radius: 4px;
-		padding: 6px;
-		cursor: pointer;
-	}
-
-	.btn-primary {
-		background-color: #709692;
-		color: whitesmoke;
-	}
-
-	.btn-secondary {
-		background-color: white;
-		color: #709692;
-	}
-
 	.chat-members-container {
 		display: flex;
 		flex-direction: column;
