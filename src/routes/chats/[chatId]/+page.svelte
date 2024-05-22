@@ -53,7 +53,7 @@
 		if (messageText.trim() !== '') {
 			const messageTextCopy = `${messageText}`;
 			messageText = '';
-			await sendTextMessage(currentChatId, user.id, messageTextCopy);
+			await sendTextMessage(currentChatId, user.id, user.displayName, messageTextCopy);
 		} else {
 			console.log("Can't sand a blank message!");
 		}
@@ -80,7 +80,14 @@
 				e.preventDefault();
 			}
 
-			await sendFile(currentChatId, user.id, attachedFileId, attachedFile, isImage);
+			await sendFile(
+				currentChatId,
+				user.id,
+				user.displayName,
+				attachedFileId,
+				attachedFile,
+				isImage
+			);
 		}
 	}
 

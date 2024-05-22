@@ -58,19 +58,37 @@ export function subscribeChatMessages(chatId, messageCount, onMessagesCallback) 
 }
 
 /**
+ * Updates last message in the chat doc
+ * @param {string} chatId
+ * @param {string} userDisplayName
+ * @param {string} messageContent
+ * @param {Timestamp} messageTimestamp
+ */
+async function updateLastMessage(chatId, userDisplayName, messageContent, messageTimestamp) {
+	const chatDoc = doc(db, 'chatRooms', chatId);
+	await updateDoc(chatDoc, {
+		lastMessage: `${userDisplayName}: ${messageContent}`,
+		lastMessageTimestamp: messageTimestamp,
+	});
+}
+
+/**
  * Creates a message
  * @param {string} chatId
  * @param {string} userId
+ * @param {string} userDisplayName
  * @param {string} messageContent
  */
-export async function sendTextMessage(chatId, userId, messageContent) {
+export async function sendTextMessage(chatId, userId, userDisplayName, messageContent) {
 	const chatMessagesCollection = getMessagesCollection(chatId);
+	const timestamp = Timestamp.fromDate(new Date());
 	await addDoc(chatMessagesCollection, {
 		userId: userId,
-		timestamp: Timestamp.fromDate(new Date()),
+		timestamp,
 		type: 'text',
 		content: messageContent,
 	});
+	await updateLastMessage(chatId, userDisplayName, messageContent, timestamp);
 }
 
 /**
@@ -89,11 +107,12 @@ async function uploadFile(chatId, fileId, file) {
  * Creates a message of file or image type
  * @param {string} chatId
  * @param {string} userId
+ * @param {string} userDisplayName
  * @param {string} fileId
  * @param {File} file
  * @param {boolean} isImage
  */
-export async function sendFile(chatId, userId, fileId, file, isImage) {
+export async function sendFile(chatId, userId, userDisplayName, fileId, file, isImage) {
 	// upload file
 	await uploadFile(chatId, fileId, file);
 	// send message
@@ -105,6 +124,7 @@ export async function sendFile(chatId, userId, fileId, file, isImage) {
 		type: isImage ? 'image' : 'file',
 		fileId,
 	});
+	await updateLastMessage(chatId, userDisplayName, file.name, timestamp);
 }
 
 /**
