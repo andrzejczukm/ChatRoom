@@ -44,9 +44,9 @@
 
 <style>
 	header {
-		background-color: whitesmoke;
+		background-color: rgb(235, 235, 235);
 		position: sticky;
-		margin-bottom: 0;
+		margin-bottom: 10px;
 	}
 
 	.header-right {

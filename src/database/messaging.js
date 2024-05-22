@@ -67,4 +67,5 @@ export async function sendTextMessage(chatId, userId, messageContent) {
 		type: 'text',
 		content: messageContent,
 	});
+
 }

@@ -88,7 +88,11 @@
 			<Spinner />
 		</div>
 	{:else}
-		<p>{currentChatId}</p>
+		<div class="list-container">
+			<p>{chatData.name}</p>
+			<a href={`${currentChatId}/manage`} class="settings-btn">Settings</a>
+		</div>
+		<hr class="separator" />
 		<div class="messages-container">
 			{#if isMoreMessagesLoading || messages.length === currentDisplayedMessages}
 				<div class="load-more-container">
@@ -102,7 +106,15 @@
 			{#each messages as message}
 				<div class="message">
 					<p>
-						<strong>{chatData.membersIdsToNames.get(message.userId)}</strong>: {message.content}
+						<span class="user-mess">
+							{chatData.membersIdsToNames.get(message.userId)}
+						</span>
+						<span class="timestamp-mess">{message.timestamp.toDate().toLocaleString()}</span>
+					</p>
+					<p>
+						<span class="message-bubble">
+							{message.content}
+						</span>
 					</p>
 				</div>
 			{/each}
@@ -120,6 +132,42 @@
 {/if}
 
 <style>
+	.timestamp-mess {
+		font-size: small;
+		font-weight: normal;
+	}
+	.user-mess {
+		justify-content: left;
+		font-family: Roboto;
+		font-size: 16px;
+	}
+	.message {
+		padding: 5px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+	}
+
+	.message p {
+		margin: 0;
+		padding: 2px;
+		font-weight: bold;
+	}
+
+	.strong {
+		font-weight: 100;
+	}
+	.message-bubble {
+		margin-bottom: 10px;
+		border-radius: 6px;
+		padding: 5px 10px;
+		height: fit-content;
+		weight: fit-content;
+		color: rgb(0, 0, 0);
+		font-size: 16px;
+		font-weight: 400;
+	}
+
 	.messages-container {
 		overflow-y: scroll;
 		height: calc(100vh - 80.875px - 6px - 59px - 170px);
@@ -176,5 +224,44 @@
 		transition: background-color 0.3s ease;
 		width: 100px;
 		margin-right: 20px;
+	}
+
+	.settings-btn {
+		display: block;
+		text-decoration: none;
+		background-color: white;
+		color: #709692;
+		border: 1px solid;
+		font-family: Roboto;
+		font-weight: bold;
+	}
+
+	.list-container {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		font-family: Roboto;
+		font-weight: bold;
+	}
+	.list-container p {
+		font-size: x-large;
+		font-family: Roboto;
+		color: black;
+		font-weight: 800;
+	}
+
+	.list-container a {
+		width: auto;
+		height: fit-content;
+		font-weight: bold;
+		font-size: 1em;
+		border-radius: 4px;
+		padding: 5px;
+		cursor: pointer;
+	}
+	.separator {
+		border: none;
+		border-top: 1px solid #000;
+		margin: 0;
 	}
 </style>
