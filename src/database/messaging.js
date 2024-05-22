@@ -4,6 +4,7 @@ import {
 	collection,
 	addDoc,
 	setDoc,
+	updateDoc,
 	Timestamp,
 	query,
 	orderBy,
@@ -75,35 +76,32 @@ export async function sendTextMessage(chatId, userId, messageContent) {
 /**
  * Common operations between sending image and file messages
  * @param {string} chatId
+ * @param {string} fileId
  * @param {File} file
- * @returns fileId
  */
-async function uploadFile(chatId, file) {
-	// generate file id
-	const timestampNow = Date.now();
-	const randomNumber = Math.floor(Math.random() * 99999);
-	const fileId = `${chatId}_${timestampNow}_${randomNumber}`;
+async function uploadFile(chatId, fileId, file) {
 	// upload file
 	const fileRef = ref(storage, `${chatId}/${fileId}/${file.name}`);
 	await uploadBytes(fileRef, file);
-
-	return fileId;
 }
 
 /**
  * Creates a message of file or image type
  * @param {string} chatId
  * @param {string} userId
+ * @param {string} fileId
  * @param {File} file
+ * @param {boolean} isImage
  */
-export async function sendFile(chatId, userId, file, isImage) {
+export async function sendFile(chatId, userId, fileId, file, isImage) {
 	// upload file
-	const fileId = await uploadFile(chatId, file);
+	await uploadFile(chatId, fileId, file);
 	// send message
 	const chatMessagesCollection = getMessagesCollection(chatId);
+	const timestamp = Timestamp.fromDate(new Date());
 	await addDoc(chatMessagesCollection, {
 		userId: userId,
-		timestamp: Timestamp.fromDate(new Date()),
+		timestamp,
 		type: isImage ? 'image' : 'file',
 		fileId,
 	});

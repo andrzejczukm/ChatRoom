@@ -4,32 +4,68 @@
 	import { UploadIcon, CheckIcon } from 'svelte-feather-icons';
 	import { getLoggedInUser } from '../../../database/auth';
 	import { updateUsernameInChat, getChatRoomData } from '../../../database/chats';
-	import { subscribeChatMessages, sendTextMessage, sendFile } from '../../../database/messaging';
+	import {
+		subscribeChatMessages,
+		sendTextMessage,
+		sendFile,
+		storeImageCaption,
+	} from '../../../database/messaging';
 	import Spinner from '../../../components/shared/Spinner.svelte';
 
 	$: currentChatId = $page.params.chatId;
+
+	// for captions
+	/** @type {import('./$types').ActionData} */
+	export let form;
+
+	onMount(async () => {
+		console.log(form);
+		const fileId = form?.fileId ?? null;
+		if (fileId === null) {
+			return;
+		}
+		// store image caption
+		const caption = form?.caption ?? 'No caption generated';
+		await storeImageCaption(currentChatId, fileId, caption);
+	});
 
 	let user = null;
 	let messageText = '';
 	// fake file name - only used to reset the input
 	let fileInputValue = '';
 	let fileInputFiles = [];
+	let attachedFileId = '';
 
-	async function sendMessage() {
+	function getFileId(file) {
+		const timestampNow = Date.now();
+		const randomNumber = Math.floor(Math.random() * 99999);
+		const fileId = `${currentChatId}_${timestampNow}_${randomNumber}`;
+		return fileId;
+	}
+
+	async function sendMessage(e) {
+		// prevent default if no image attached;
+		if (fileInputFiles.length === 0) {
+			e.preventDefault();
+		}
+
 		// send text message
 		if (messageText.trim() !== '') {
 			const messageTextCopy = `${messageText}`;
 			messageText = '';
 			await sendTextMessage(currentChatId, user.id, messageTextCopy);
-			console.log('messageText ' + messageTextCopy);
 		} else {
 			console.log("Can't sand a blank message!");
 		}
 
 		// send attached file
-		if (fileInputFiles.length > 0) {
+		if (fileInputFiles.length === 0) {
+			// only call default action if image attached
+			e.preventDefault();
+		} else {
 			// only a single file at a time is allowed
-			const file = fileInputFiles[0];
+			const attachedFile = fileInputFiles[0];
+			attachedFileId = getFileId(attachedFile);
 			// reset file input
 			fileInputValue = '';
 			fileInputFiles = [];
@@ -39,7 +75,12 @@
 			const matches = attachedFile.name.match(isImageRegex);
 			const isImage = matches !== null;
 
-			await sendFile(currentChatId, user.id, attachedFile, isImage);
+			// only call default action if image attached
+			if (!isImage) {
+				e.preventDefault();
+			}
+
+			await sendFile(currentChatId, user.id, attachedFileId, attachedFile, isImage);
 		}
 	}
 
@@ -128,7 +169,13 @@
 				</div>
 			{/each}
 		</div>
-		<form class="input-field" on:submit|preventDefault={sendMessage}>
+		<form
+			method="POST"
+			action="?/caption"
+			enctype="multipart/form-data"
+			class="input-field"
+			on:submit={sendMessage}
+		>
 			<textarea
 				type="text"
 				id="new-username"
@@ -146,8 +193,15 @@
 				<input
 					type="file"
 					id="file-input"
+					name="file-input"
 					bind:files={fileInputFiles}
 					bind:value={fileInputValue}
+				/>
+				<input
+					type="text"
+					name="file-id-container"
+					bind:value={attachedFileId}
+					class="file-id-container"
 				/>
 			</label>
 			<button type="submit">Send</button>
@@ -212,6 +266,10 @@
 		text-overflow: ellipsis;
 	}
 
+	.file-input .file-id-container {
+		display: none;
+	}
+
 	.file-input {
 		cursor: pointer;
 		display: block;
@@ -233,7 +291,7 @@
 	}
 
 	.file-input:hover {
-		background-color: #eeeeee;
+		background-color: rgb(235, 235, 235);
 	}
 
 	.input-field button {
