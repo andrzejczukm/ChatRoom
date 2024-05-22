@@ -1,17 +1,22 @@
 <script>
 	import { page } from '$app/stores';
 	import { onDestroy, onMount } from 'svelte';
+	import { UploadIcon, CheckIcon } from 'svelte-feather-icons';
 	import { getLoggedInUser } from '../../../database/auth';
 	import { updateUsernameInChat, getChatRoomData } from '../../../database/chats';
-	import { subscribeChatMessages, sendTextMessage } from '../../../database/messaging';
+	import { subscribeChatMessages, sendTextMessage, sendFile } from '../../../database/messaging';
 	import Spinner from '../../../components/shared/Spinner.svelte';
 
 	$: currentChatId = $page.params.chatId;
 
 	let user = null;
 	let messageText = '';
+	// fake file name - only used to reset the input
+	let fileInputValue = '';
+	let fileInputFiles = [];
 
 	async function sendMessage() {
+		// send text message
 		if (messageText.trim() !== '') {
 			const messageTextCopy = `${messageText}`;
 			messageText = '';
@@ -19,6 +24,22 @@
 			console.log('messageText ' + messageTextCopy);
 		} else {
 			console.log("Can't sand a blank message!");
+		}
+
+		// send attached file
+		if (fileInputFiles.length > 0) {
+			// only a single file at a time is allowed
+			const file = fileInputFiles[0];
+			// reset file input
+			fileInputValue = '';
+			fileInputFiles = [];
+
+			// check if the file is an image
+			const isImageRegex = /.*\.png|.*\.jpg|.*\.jpeg/g;
+			const matches = attachedFile.name.match(isImageRegex);
+			const isImage = matches !== null;
+
+			await sendFile(currentChatId, user.id, attachedFile, isImage);
 		}
 	}
 
@@ -114,7 +135,22 @@
 				bind:value={messageText}
 				placeholder="Write a message..."
 			/>
-			<button type="submit">send</button>
+			<label class="file-input">
+				{#if fileInputFiles.length === 0}
+					<UploadIcon />
+					<p>Upload file</p>
+				{:else}
+					<CheckIcon />
+					<p>{fileInputFiles[0].name}</p>
+				{/if}
+				<input
+					type="file"
+					id="file-input"
+					bind:files={fileInputFiles}
+					bind:value={fileInputValue}
+				/>
+			</label>
+			<button type="submit">Send</button>
 		</form>
 	{/if}
 {/if}
@@ -149,6 +185,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: 10px;
 	}
 
 	.input-field textarea {
@@ -156,11 +193,47 @@
 		border: 1px solid #ccc;
 		border-radius: 6px;
 		padding: 10px;
-		margin-right: 10px;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		width: 100%;
+	}
+
+	.file-input input[type='file'] {
+		opacity: 0;
+		position: absolute;
+		z-index: -10;
+	}
+
+	.file-input p {
+		margin: 0;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+
+	.file-input {
+		cursor: pointer;
+		display: block;
+		width: 20%;
+		height: calc(100% - 4px); /* subtract border width */
+		border-width: 2px;
+		border-style: dashed;
+		border-color: #709692;
+		border-radius: 6px;
+		color: #709692;
+		font-weight: 600;
+		font-size: small;
+		display: flex;
+		flex-direction: row;
+		gap: 6px;
+		padding: 0 6px;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.file-input:hover {
+		background-color: #eeeeee;
 	}
 
 	.input-field button {
@@ -175,6 +248,6 @@
 		font-weight: normal;
 		transition: background-color 0.3s ease;
 		width: 100px;
-		margin-right: 20px;
+		height: 100%;
 	}
 </style>
