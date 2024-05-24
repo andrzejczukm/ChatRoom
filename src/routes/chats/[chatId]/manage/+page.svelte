@@ -54,10 +54,12 @@
 			<section class="one-line-section">
 				<p class="highlight">Chat name:</p>
 				{#if isEditingChatName}
-					<input type="text" bind:value={chatNameInput} />
-					<button class="icon-btn" on:click={confirmEditChatName}>
-						<CheckIcon />
-					</button>
+					<form on:submit|preventDefault={confirmEditChatName}>
+						<input type="text" bind:value={chatNameInput} />
+						<button class="icon-btn" type="submit">
+							<CheckIcon />
+						</button>
+					</form>
 					<button class="icon-btn" on:click={cancelEditChatName}>
 						<XIcon />
 					</button>
@@ -122,7 +124,8 @@
 		padding: 48px 0;
 	}
 
-	.one-line-section {
+	.one-line-section,
+	form {
 		display: flex;
 		align-items: center;
 		gap: 6px;
