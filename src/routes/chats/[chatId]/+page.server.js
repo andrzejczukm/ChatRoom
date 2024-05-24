@@ -4,8 +4,12 @@ import queryCaptioningModel from '../../../captioning/query';
 export const actions = {
 	caption: async ({ request }) => {
 		const formData = await request.formData();
-		const image = formData.get('imageInput');
+		const image = formData.get('file-input');
+
 		const modelResponse = await queryCaptioningModel(image);
-		return { caption: modelResponse };
+
+		const fileId = formData.get('file-id-container');
+		const response = { fileId, caption: modelResponse };
+		return response;
 	},
 };
