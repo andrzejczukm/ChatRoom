@@ -1,24 +1,92 @@
 <script>
 	import { page } from '$app/stores';
 	import { onDestroy, onMount } from 'svelte';
+	import { UploadIcon, CheckIcon } from 'svelte-feather-icons';
 	import { getLoggedInUser } from '../../../database/auth';
 	import { updateUsernameInChat, getChatRoomData } from '../../../database/chats';
-	import { subscribeChatMessages, sendTextMessage } from '../../../database/messaging';
+	import {
+		subscribeChatMessages,
+		sendTextMessage,
+		sendFile,
+		storeImageCaption,
+	} from '../../../database/messaging';
 	import Spinner from '../../../components/shared/Spinner.svelte';
 
 	$: currentChatId = $page.params.chatId;
 
+	// for captions
+	/** @type {import('./$types').ActionData} */
+	export let form;
+
+	onMount(async () => {
+		const fileId = form?.fileId ?? null;
+		if (fileId === null) {
+			return;
+		}
+		// store image caption
+		const caption = form?.caption ?? 'No caption generated';
+		await storeImageCaption(currentChatId, fileId, caption);
+	});
+
 	let user = null;
 	let messageText = '';
+	// fake file name - only used to reset the input
+	let fileInputValue = '';
+	let fileInputFiles = [];
+	let attachedFileId = '';
 
-	async function sendMessage() {
+	function getFileId(file) {
+		const timestampNow = Date.now();
+		const randomNumber = Math.floor(Math.random() * 99999);
+		const fileId = `${currentChatId}_${timestampNow}_${randomNumber}`;
+		return fileId;
+	}
+
+	async function sendMessage(e) {
+		// prevent default if no image attached;
+		if (fileInputFiles.length === 0) {
+			e.preventDefault();
+		}
+
+		// send text message
 		if (messageText.trim() !== '') {
 			const messageTextCopy = `${messageText}`;
 			messageText = '';
-			await sendTextMessage(currentChatId, user.id, messageTextCopy);
-			console.log('messageText ' + messageTextCopy);
+			await sendTextMessage(currentChatId, user.id, user.displayName, messageTextCopy);
 		} else {
 			console.log("Can't sand a blank message!");
+		}
+
+		// send attached file
+		if (fileInputFiles.length === 0) {
+			// only call default action if image attached
+			e.preventDefault();
+		} else {
+			// only a single file at a time is allowed
+			const attachedFile = fileInputFiles[0];
+			attachedFileId = getFileId(attachedFile);
+			// reset file input
+			fileInputValue = '';
+			fileInputFiles = [];
+
+			// check if the file is an image
+			const isImageRegex = /.*\.png|.*\.jpg|.*\.jpeg/g;
+			const matches = attachedFile.name.match(isImageRegex);
+			const isImage = matches !== null;
+
+			// only call default action if image attached
+			if (!isImage) {
+				e.preventDefault();
+			}
+
+			await sendFile(
+				currentChatId,
+				user.id,
+				user.displayName,
+				attachedFileId,
+				attachedFile,
+				isImage
+			);
 		}
 	}
 
@@ -138,14 +206,42 @@
 				</div>
 			{/each}
 		</div>
-		<form class="input-field" on:submit|preventDefault={sendMessage}>
+		<form
+			method="POST"
+			action="?/caption"
+			enctype="multipart/form-data"
+			class="input-field"
+			on:submit={sendMessage}
+		>
 			<textarea
 				type="text"
 				id="new-username"
 				bind:value={messageText}
 				placeholder="Write a message..."
 			/>
-			<button type="submit">send</button>
+			<label class="file-input">
+				{#if fileInputFiles.length === 0}
+					<UploadIcon />
+					<p>Upload file</p>
+				{:else}
+					<CheckIcon />
+					<p>{fileInputFiles[0].name}</p>
+				{/if}
+				<input
+					type="file"
+					id="file-input"
+					name="file-input"
+					bind:files={fileInputFiles}
+					bind:value={fileInputValue}
+				/>
+				<input
+					type="text"
+					name="file-id-container"
+					bind:value={attachedFileId}
+					class="file-id-container"
+				/>
+			</label>
+			<button type="submit">Send</button>
 		</form>
 	{/if}
 {/if}
@@ -220,6 +316,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: 10px;
 	}
 
 	.input-field textarea {
@@ -227,11 +324,51 @@
 		border: 1px solid #ccc;
 		border-radius: 6px;
 		padding: 10px;
-		margin-right: 10px;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		width: 100%;
+	}
+
+	.file-input input[type='file'] {
+		opacity: 0;
+		position: absolute;
+		z-index: -10;
+	}
+
+	.file-input p {
+		margin: 0;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+
+	.file-input .file-id-container {
+		display: none;
+	}
+
+	.file-input {
+		cursor: pointer;
+		display: block;
+		width: 20%;
+		height: calc(100% - 4px); /* subtract border width */
+		border-width: 2px;
+		border-style: dashed;
+		border-color: #709692;
+		border-radius: 6px;
+		color: #709692;
+		font-weight: 600;
+		font-size: small;
+		display: flex;
+		flex-direction: row;
+		gap: 6px;
+		padding: 0 6px;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.file-input:hover {
+		background-color: rgb(235, 235, 235);
 	}
 
 	.input-field button {
@@ -246,7 +383,7 @@
 		font-weight: normal;
 		transition: background-color 0.3s ease;
 		width: 100px;
-		margin-right: 20px;
+		height: 100%;
 	}
 
 	.settings-btn {

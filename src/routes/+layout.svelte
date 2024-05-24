@@ -19,11 +19,11 @@
 
 <header>
 	<div class="header-right">
-		<h1 class="logo">ChatRoom</h1>
+		<h1 class="logo"><a href="/">Holiday Chat Room</a></h1>
 		<div class="links">
 			<a href="/about">About</a>
-			<a class="active" href="/chats">Chat</a>
-			<a href="/catalog">Catalog</a>
+			<a class="active" href="/chats">Chats</a>
+			<a href="/catalog">Catalogs</a>
 			{#if user !== null}
 				<a href="/profile">Profile</a>
 				<button on:click={logOut}>Logout</button>
@@ -38,7 +38,7 @@
 
 <footer>
 	<div class="footer-content">
-		<p>© 2024 Chat Room. Project created for Cloud Computing.</p>
+		<p>© 2024 Holiday Chat Room. Project created for Cloud Computing.</p>
 	</div>
 </footer>
 
@@ -60,6 +60,11 @@
 		font-size: 2em;
 		color: #000;
 		font-weight: 1000;
+	}
+
+	.logo a {
+		text-decoration: none;
+		color: inherit;
 	}
 
 	.links a {
