@@ -1,4 +1,4 @@
-import { db } from './config';
+import { db, storage } from './config';
 import {
 	onSnapshot,
 	collection,
@@ -9,6 +9,7 @@ import {
 	limitToLast,
 	CollectionReference,
 } from 'firebase/firestore';
+import { ref, listAll, getDownloadURL } from 'firebase/storage';
 
 /**
  * Get a reference to messages collection for a given chat
@@ -35,19 +36,46 @@ export function subscribeChatMessages(chatId, messageCount, onMessagesCallback) 
 		limitToLast(messageCount)
 	);
 	// listen to messages
-	const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+	const unsubscribe = onSnapshot(messagesQuery, async (snapshot) => {
 		if (snapshot.empty) {
 			onMessagesCallback([]);
 			return;
 		}
-		const messagesData = snapshot.docs.map((messageDoc) => ({
-			id: messageDoc.id,
-			userId: messageDoc.get('userId'),
-			timestamp: messageDoc.get('timestamp'),
-			type: messageDoc.get('type'),
-			content: messageDoc.get('content'),
-			fileId: messageDoc.get('fileId'),
-		}));
+		const messagesData = await Promise.all(
+			snapshot.docs.map(async (messageDoc) => {
+				const fileId = messageDoc.get('fileId');
+				let file = undefined;
+				if (fileId !== undefined) {
+					// TODO
+					// napisz tu zeby sciagal z bazy dane o zdjeciach wlasnei name i url
+					file = {
+						name: 'filename',
+						downloadUrl: 'https://picsum.photos/200/300',
+					};
+					const fileStorageRef = ref(storage, `${chatId}/${fileId}`);
+
+					const fileList = await listAll(fileStorageRef);
+					if (fileList.items.length > 0) {
+						console.log(fileList);
+						const fileRef = fileList.items[0];
+						const downloadUrl = await getDownloadURL(fileRef);
+						file = {
+							name: fileRef.name,
+							downloadUrl: downloadUrl,
+						};
+					}
+				}
+
+				return {
+					id: messageDoc.id,
+					userId: messageDoc.get('userId'),
+					timestamp: messageDoc.get('timestamp'),
+					type: messageDoc.get('type'),
+					content: messageDoc.get('content'),
+					file,
+				};
+			})
+		);
 		onMessagesCallback(messagesData);
 	});
 	return unsubscribe;
@@ -67,5 +95,4 @@ export async function sendTextMessage(chatId, userId, messageContent) {
 		type: 'text',
 		content: messageContent,
 	});
-
 }

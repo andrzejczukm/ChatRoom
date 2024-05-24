@@ -44,7 +44,18 @@
 
 	function onNewMessages(newMessages) {
 		messages = newMessages;
+		if (!isMoreMessagesLoading) {
+			setTimeout(scrollToBottom, 500);
+		}
 		isMoreMessagesLoading = false;
+	}
+
+	function scrollToBottom() {
+		const messagesContainer = document.querySelector('.messages-container');
+		if (messagesContainer === null) {
+			return;
+		}
+		messagesContainer.scrollTop = messagesContainer.scrollHeight;
 	}
 
 	/**
@@ -112,9 +123,17 @@
 						<span class="timestamp-mess">{message.timestamp.toDate().toLocaleString()}</span>
 					</p>
 					<p>
-						<span class="message-bubble">
-							{message.content}
-						</span>
+						{#if message.type === 'image'}
+							<a href={message.file.downloadUrl} download>
+								<img src={message.file.downloadUrl} alt={message.file.name} />
+							</a>
+						{:else if message.type === 'file'}
+							<a href={message.file.downloadUrl} download class="link">
+								{message.file.name}
+							</a>
+						{:else}
+							<span class="message-bubble">{message.content}</span>
+						{/if}
 					</p>
 				</div>
 			{/each}
@@ -132,6 +151,9 @@
 {/if}
 
 <style>
+	.link {
+		color: #709692;
+	}
 	.timestamp-mess {
 		font-size: small;
 		font-weight: normal;
@@ -160,7 +182,7 @@
 	.message-bubble {
 		margin-bottom: 10px;
 		border-radius: 6px;
-		padding: 5px 10px;
+		padding: 5px 0px;
 		height: fit-content;
 		weight: fit-content;
 		color: rgb(0, 0, 0);
@@ -179,6 +201,7 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: center;
+		padding-top: 5px;
 	}
 
 	.spinner-container {
