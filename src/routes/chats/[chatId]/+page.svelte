@@ -19,7 +19,6 @@
 	export let form;
 
 	onMount(async () => {
-		console.log(form);
 		const fileId = form?.fileId ?? null;
 		if (fileId === null) {
 			return;
