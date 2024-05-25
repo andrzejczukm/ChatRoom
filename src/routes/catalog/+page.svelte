@@ -1,42 +1,27 @@
 <script>
     import { writable} from 'svelte/store'
-    import { page } from '$app/stores';
 	import { getLoggedInUser } from '../../database/auth';
     import { getRandomFolder, getImageUrlFromFolderRef, getChatName } from '../../database/catalog';
-	import { onDestroy, onMount } from 'svelte';
-    import { db, storage } from '../../database/config';
+	import { onMount } from 'svelte';
+    import { db } from '../../database/config';
     import {
 	collection,
-	addDoc,
-	onSnapshot,
 	query,
 	where,
-	Timestamp,
-	getDoc,
-	doc,
-	updateDoc,
-	setDoc,
 	getDocs,
-	arrayUnion,
-	arrayRemove,
 } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage';
 
 const chatRoomsCollection = collection(db, 'chatRooms');
-    // Reactive declaration to log the page store value whenever it changes
     let user = null;
     let imageUrls = writable([]); // Array to store image URLs
 
 
     onMount(async () => {
         user = await getLoggedInUser();
-        // console.log({ user: user });
-        // console.log({ userId: user.id });
         if (user) {
             const userChatsQuery = query(chatRoomsCollection, where('members', 'array-contains', user.id));
             const userChats = await getDocs(userChatsQuery);
-            // console.log(userChats)
-            const urls = []; // Temporary array to store image URLs
+            const urls = [];
 
             for (const chat of userChats.docs) {
                 const folderRef = await getRandomFolder(chat.id);
@@ -63,8 +48,9 @@ const chatRoomsCollection = collection(db, 'chatRooms');
         <figure>
             <a href="catalog/{imageObj.chatId}" target="_blank">
             <div class="image-wrapper">
-            <img src="{imageObj.imageUrl}"/></div></a>
+            <img src="{imageObj.imageUrl}" alt="{imageObj.chatId}"/></div></a>
             <a href="catalog/{imageObj.chatId}" target="_blank">
+            <!-- svelte-ignore a11y-structure -->
             <figcaption>{imageObj.chatName}</figcaption></a>
         </figure>
     </div>
@@ -75,14 +61,12 @@ const chatRoomsCollection = collection(db, 'chatRooms');
     img {
         width: 100%;
         height: 100%;
-        display: block; /* Remove extra space below image */
+        display: block; 
     }
     
     .grid-container {
     display: flex;
     flex-wrap: wrap;
-    /* display: grid;
-    grid-template-columns: auto auto auto auto; */
     gap: 10px;
     background-color: #709692;
     padding: 10px;
@@ -91,13 +75,13 @@ const chatRoomsCollection = collection(db, 'chatRooms');
     }
 
     .image-wrapper {
-    width: 256px; /* Set desired width */
-    height: 256px; /* Set desired height */
-    margin: 10px; /* Adjust margin as needed */
-    overflow: hidden; /* Hide overflow content */
-    background-color: white; /* Set background color to white */
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
+    width: 256px; 
+    height: 256px; 
+    margin: 10px; 
+    overflow: hidden; 
+    background-color: white;
+    justify-content: center;
+    align-items: center;
 }
 
     * {
