@@ -2,7 +2,8 @@
     import { writable} from 'svelte/store'
     import { page } from '$app/stores';
     import {listAllImages, downloadSelected } from '../../../database/catalog';
-	import { onMount } from 'svelte';
+    import { onMount } from 'svelte';
+    import Spinner from '../../../components/shared/Spinner.svelte';
 
 let imageUrls = writable([]);
 
@@ -17,7 +18,13 @@ $: chatId = $page.params.chatId;
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<div class="grid-container">
+{#if $imageUrls.length === 0}
+  <div class="spinner-container">
+    <Spinner/>
+  </div>
+  
+{:else}
+  <div class="grid-container">
     {#each $imageUrls as imageObj}
       <div>
         <figure>
@@ -30,9 +37,11 @@ $: chatId = $page.params.chatId;
       </div>
     {/each}
   </div>
-<button on:click={downloadSelected} id='downloadSelected'> Download Selected</button>
+{/if}
+<div class='button-container'>
+  <button on:click={downloadSelected} id='downloadSelected' class="btn btn-primary"> Download Selected</button>
 
-
+</div>
 
     
 
@@ -43,12 +52,18 @@ $: chatId = $page.params.chatId;
     opacity: 0;
     pointer-events: none;
 }
+.button-container{
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
 
 .image-wrapper img {
     width: 100%;
     height: 100%;
     cursor: pointer;
-    border: 2px solid transparent;
+    border: 5px solid transparent;
     transition: border-color 0.3s;
 }
 
@@ -56,7 +71,7 @@ $: chatId = $page.params.chatId;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(256px, 1fr));
     gap: 10px;
-    background-color: #709692;
+    /* background-color: #709692; */
     padding: 10px;
     justify-content: center;
     align-content: center;
@@ -75,7 +90,7 @@ $: chatId = $page.params.chatId;
 }
 
 .image-checkbox:checked + img {
-    border-color: blue;
+  border-color: #709692;
 }
 
 * {
@@ -86,4 +101,10 @@ figcaption {
     text-align: center;
 }
 
+.spinner-container {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		padding: 48px 0;
+	}
 </style>

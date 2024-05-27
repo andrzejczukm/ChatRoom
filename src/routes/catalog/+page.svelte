@@ -46,10 +46,10 @@ const chatRoomsCollection = collection(db, 'chatRooms');
     {#each $imageUrls as imageObj}
     <div>
         <figure>
-            <a href="catalog/{imageObj.chatId}" target="_blank">
+            <a href="catalog/{imageObj.chatId}">
             <div class="image-wrapper">
             <img src="{imageObj.imageUrl}" alt="{imageObj.chatId}"/></div></a>
-            <a href="catalog/{imageObj.chatId}" target="_blank">
+            <a href="catalog/{imageObj.chatId}">
             <!-- svelte-ignore a11y-structure -->
             <figcaption>{imageObj.chatName}</figcaption></a>
         </figure>
@@ -68,7 +68,7 @@ const chatRoomsCollection = collection(db, 'chatRooms');
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    background-color: #709692;
+    /* background-color: #709692; */
     padding: 10px;
     justify-content: space-evenly;
     align-content: center;
@@ -90,5 +90,11 @@ const chatRoomsCollection = collection(db, 'chatRooms');
 
     figcaption {
     text-align: center;
+    color : #709692;
+    border : none;
+    text-decoration:none;
+    }
+    a {
+        text-decoration:none;
     }
 </style>
