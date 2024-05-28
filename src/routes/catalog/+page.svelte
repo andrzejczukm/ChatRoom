@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { db } from '../../database/config';
 	import { collection, query, where, getDocs } from 'firebase/firestore';
+	import Spinner from '../../components/shared/Spinner.svelte';
 
 	const chatRoomsCollection = collection(db, 'chatRooms');
 	let user = null;
@@ -38,23 +39,29 @@
 </script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<div class="grid-container">
-	{#each $imageUrls as imageObj}
-		<div>
-			<figure>
-				<a href="catalog/{imageObj.chatId}">
-					<div class="image-wrapper">
-						<img src={imageObj.imageUrl} alt={imageObj.chatId} />
-					</div></a
-				>
-				<a href="catalog/{imageObj.chatId}">
-					<!-- svelte-ignore a11y-structure -->
-					<figcaption>{imageObj.chatName}</figcaption></a
-				>
-			</figure>
-		</div>
-	{/each}
-</div>
+{#if $imageUrls.length === 0}
+	<div class="spinner-container">
+		<Spinner />
+	</div>
+{:else}
+	<div class="grid-container">
+		{#each $imageUrls as imageObj}
+			<div>
+				<figure>
+					<a href="catalog/{imageObj.chatId}">
+						<div class="image-wrapper">
+							<img src={imageObj.imageUrl} alt={imageObj.chatId} />
+						</div></a
+					>
+					<a href="catalog/{imageObj.chatId}">
+						<!-- svelte-ignore a11y-structure -->
+						<figcaption>{imageObj.chatName}</figcaption></a
+					>
+				</figure>
+			</div>
+		{/each}
+	</div>
+{/if}
 
 <style>
 	img {
@@ -95,5 +102,12 @@
 	}
 	a {
 		text-decoration: none;
+	}
+
+	.spinner-container {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		padding: 48px 0;
 	}
 </style>

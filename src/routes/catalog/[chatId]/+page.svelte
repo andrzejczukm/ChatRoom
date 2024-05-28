@@ -39,12 +39,12 @@
 			</div>
 		{/each}
 	</div>
+	<div class="button-container">
+		<button on:click={downloadSelected} id="downloadSelected" class="btn btn-primary">
+			Download Selected</button
+		>
+	</div>
 {/if}
-<div class="button-container">
-	<button on:click={downloadSelected} id="downloadSelected" class="btn btn-primary">
-		Download Selected</button
-	>
-</div>
 
 <style>
 	.image-checkbox {
