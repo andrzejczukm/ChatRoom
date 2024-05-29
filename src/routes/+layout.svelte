@@ -1,7 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
 	import '../app.css';
-	import { goto } from '$app/navigation';
 	import { getLoggedInUser, logOutUser } from '../database/auth.js';
 
 	let user = null;
@@ -45,7 +44,6 @@
 	header {
 		background-color: rgb(235, 235, 235);
 		position: sticky;
-		margin-bottom: 10px;
 	}
 
 	.header-right {

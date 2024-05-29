@@ -159,7 +159,7 @@
 		gap: 24px;
 		grid-template-columns: repeat(12, minmax(0, 1fr));
 		min-height: 100%;
-		padding: 0 24px;
+		padding: 10px 24px 0;
 	}
 
 	.chats-container aside {

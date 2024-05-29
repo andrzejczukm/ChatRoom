@@ -6,7 +6,7 @@
 	import Spinner from '../../components/shared/Spinner.svelte';
 
 	let user = null;
-	let imageUrls = writable([]); // Array to store image URLs
+	let imageUrls = writable(null); // Array to store image URLs
 
 	onMount(async () => {
 		user = getLoggedInUser();
@@ -19,9 +19,13 @@
 </script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-{#if $imageUrls.length === 0}
+{#if $imageUrls === null}
 	<div class="spinner-container">
 		<Spinner />
+	</div>
+{:else if $imageUrls.length === 0}
+	<div class="no-chats-info">
+		<p>No catalogs found. Send images in chats to create catalogs</p>
 	</div>
 {:else}
 	<div class="grid-container">
@@ -89,5 +93,17 @@
 		display: flex;
 		justify-content: center;
 		padding: 48px 0;
+	}
+
+	.no-chats-info {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		height: 100%;
+		align-items: center;
+		justify-content: center;
+		color: grey;
+		text-align: center;
+		padding: 0 4px;
 	}
 </style>
