@@ -131,7 +131,7 @@
 					</div>
 				{/if}
 			{:else}
-				<div class="chats-spinner-container">
+				<div class="spinner-container">
 					<Spinner />
 				</div>
 			{/if}
@@ -151,7 +151,7 @@
 		width: 100%;
 		display: flex;
 		justify-content: center;
-		padding: 48px 0;
+		padding: 24px 0;
 	}
 
 	.chats-container {

@@ -26,7 +26,7 @@
 			<a href="/catalog">Catalogs</a>
 			<a href="/profile">Profile</a>
 			{#if user !== null}
-				<button on:click={logOut}>Logout</button>
+				<button on:click={logOut} class="logout-btn">Logout</button>
 			{:else}
 				<a href="/login">Login</a>
 			{/if}
@@ -89,7 +89,8 @@
 		padding: 0;
 	}
 
-	.links a:hover {
+	.links a:hover,
+	.links .logout-btn:hover {
 		color: #709692;
 		/* rgb(117, 117, 117); */
 		transition: background-color 0.3s ease;
