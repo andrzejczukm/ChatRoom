@@ -95,16 +95,23 @@ export async function createChatRoom(userUid) {
 /**
  * Adds the user to the chat room
  * @param {string} chatId
- * @param {string} userUid
- * @returns {Promise<string | null>} The ID of the chat room, or null if
- * there is no chat room with specified ID
+ * @param {string} userEmail
+ * @returns {Promise<string | null>} The ID of the user, or null if
+ * there is no user with specified email
  */
-export async function joinChatRoom(chatId, userId) {
+export async function addChatMember(chatId, userEmail) {
 	try {
+		const userEmailToIdDoc = await getDoc(doc(db, `userEmailToUid/${userEmail}`));
+		const userId = userEmailToIdDoc.get('uid');
+
+		// before the new member views the chat, his displayName in chat will be his email
+		await updateUsernameInChat(chatId, userId, userEmail);
+		// add user
 		await updateDoc(doc(chatRoomsCollection, chatId), {
 			members: arrayUnion(userId),
 		});
-		return chatId;
+
+		return userId;
 	} catch (e) {
 		return null;
 	}
@@ -173,10 +180,17 @@ export async function demoteChatMember(chatId, memberId) {
 /**
  * @param {string} chatId
  * @param {string} memberId
+ * @param {boolean} isUserAdmin
  */
-export async function removeChatMember(chatId, memberId) {
-	await updateDoc(doc(chatRoomsCollection, chatId), {
-		administrators: arrayRemove(memberId),
-		members: arrayRemove(memberId),
-	});
+export async function removeChatMember(chatId, memberId, isUserAdmin = true) {
+	if (isUserAdmin) {
+		await updateDoc(doc(chatRoomsCollection, chatId), {
+			administrators: arrayRemove(memberId),
+			members: arrayRemove(memberId),
+		});
+	} else {
+		await updateDoc(doc(chatRoomsCollection, chatId), {
+			members: arrayRemove(memberId),
+		});
+	}
 }

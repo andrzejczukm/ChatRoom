@@ -35,7 +35,6 @@
 		} else {
 			await register();
 		}
-		location.reload();
 	}
 
 	async function logIn() {
@@ -43,6 +42,7 @@
 			await logInUser(email, password);
 			// redirect after successful logIn
 			goto('/');
+			location.reload();
 		} catch (err) {
 			alertMessage = err.message;
 		}
@@ -61,6 +61,7 @@
 			await registerUser(email, password, displayName);
 			// redirect after successful register
 			goto('/');
+			location.reload();
 		} catch (err) {
 			alertMessage = err.message;
 		}
