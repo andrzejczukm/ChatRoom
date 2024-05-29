@@ -1,37 +1,17 @@
 <script>
 	import { writable } from 'svelte/store';
 	import { getLoggedInUser } from '../../database/auth';
-	import { getRandomFolder, getImageUrlFromFolderRef, getChatName } from '../../database/catalog';
+	import { getCatalogsData } from '../../database/catalog';
 	import { onMount } from 'svelte';
-	import { db } from '../../database/config';
-	import { collection, query, where, getDocs } from 'firebase/firestore';
 	import Spinner from '../../components/shared/Spinner.svelte';
 
-	const chatRoomsCollection = collection(db, 'chatRooms');
 	let user = null;
 	let imageUrls = writable([]); // Array to store image URLs
 
 	onMount(async () => {
-		user = await getLoggedInUser();
+		user = getLoggedInUser();
 		if (user) {
-			const userChatsQuery = query(
-				chatRoomsCollection,
-				where('members', 'array-contains', user.id)
-			);
-			const userChats = await getDocs(userChatsQuery);
-			const urls = [];
-
-			for (const chat of userChats.docs) {
-				const folderRef = await getRandomFolder(chat.id);
-				const chatName = await getChatName(chat.id);
-				if (folderRef) {
-					const url = await getImageUrlFromFolderRef(folderRef);
-					if (url) {
-						urls.push({ imageUrl: url, chatName: chatName, chatId: chat.id }); // Add URL to the temporary array
-					}
-				}
-			}
-
+			const urls = await getCatalogsData(user.id);
 			// Update the writable store with the array of image URLs
 			imageUrls.set(urls);
 		}
