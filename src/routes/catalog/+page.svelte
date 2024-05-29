@@ -39,8 +39,8 @@
 					>
 					<a href="catalog/{imageObj.chatId}">
 						<!-- svelte-ignore a11y-structure -->
-						<figcaption>{imageObj.chatName}</figcaption></a
-					>
+						<figcaption><b>{imageObj.chatName}</b></figcaption>
+					</a>
 				</figure>
 			</div>
 		{/each}

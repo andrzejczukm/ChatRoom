@@ -58,16 +58,31 @@ export async function listAllImages(chatId) {
 		if (subdirs.prefixes.length === 0) {
 			return null;
 		}
+		// fetch captions docs
+		const captionsRef = collection(chatRoomsCollection, `${chatId}/captions`);
+		const captionsDocs = await getDocs(query(captionsRef));
+		const captionsMap = new Map();
+		for (let captionDoc of captionsDocs.docs) {
+			captionsMap.set(captionDoc.id, captionDoc.get('caption'));
+		}
+
+		// fetch images
 		const imageUrls = [];
 
 		for (const subdir of subdirs.prefixes) {
 			const imageReference = await listAll(subdir);
 			let title = imageReference.items[0].name;
-			var extension = title.split('.').pop();
+			const extension = title.split('.').pop();
 
 			if (extension === 'png' || extension === 'jpg') {
 				const url = await getDownloadURL(imageReference.items[0]);
-				const urlTitleRefTuple = { imageUrl: url, imageTitle: title, imageRef: imageReference };
+				const caption = captionsMap.get(subdir.name) ?? 'No caption generated';
+				const urlTitleRefTuple = {
+					imageUrl: url,
+					imageTitle: title,
+					imageRef: imageReference,
+					caption,
+				};
 				imageUrls.push(urlTitleRefTuple);
 			}
 		}

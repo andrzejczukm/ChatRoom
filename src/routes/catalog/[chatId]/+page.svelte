@@ -23,19 +23,18 @@
 {:else}
 	<div class="grid-container">
 		{#each $imageUrls as imageObj}
-			<div>
-				<figure>
-					<label class="image-wrapper">
-						<input
-							type="checkbox"
-							class="image-checkbox"
-							image-url="{imageObj.imageUrl},"
-							image-title={imageObj.imageTitle}
-						/>
-						<img src={imageObj.imageUrl} alt={imageObj.imageTitle} />
-					</label>
-					<figcaption>{imageObj.imageTitle}</figcaption>
-				</figure>
+			<div class="image-container">
+				<label class="image-wrapper">
+					<input
+						type="checkbox"
+						class="image-checkbox"
+						image-url="{imageObj.imageUrl},"
+						image-title={imageObj.imageTitle}
+					/>
+					<img src={imageObj.imageUrl} alt={imageObj.imageTitle} />
+				</label>
+				<p class="img-caption">{imageObj.caption}</p>
+				<p class="img-filename">{imageObj.imageTitle}</p>
 			</div>
 		{/each}
 	</div>
@@ -67,12 +66,29 @@
 		transition: border-color 0.3s;
 	}
 
+	.image-container {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		align-items: center;
+	}
+
+	.image-container p {
+		margin: 0;
+		text-align: center;
+		width: 100%;
+	}
+
+	.image-container .img-filename {
+		color: grey;
+	}
+
 	.grid-container {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(256px, 1fr));
 		gap: 10px;
 		/* background-color: #709692; */
-		padding: 10px;
+		padding: 10px 40px;
 		justify-content: center;
 		align-content: center;
 	}
@@ -95,10 +111,6 @@
 
 	* {
 		box-sizing: border-box;
-	}
-
-	figcaption {
-		text-align: center;
 	}
 
 	.spinner-container {
