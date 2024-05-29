@@ -24,11 +24,10 @@
 			<a href="/about">About</a>
 			<a class="active" href="/chats">Chats</a>
 			<a href="/catalog">Catalogs</a>
+			<a href="/profile">Profile</a>
 			{#if user !== null}
-				<a href="/profile">Profile</a>
 				<button on:click={logOut}>Logout</button>
 			{:else}
-				<a href="/login">Profile</a>
 				<a href="/login">Login</a>
 			{/if}
 		</div>
