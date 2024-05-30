@@ -12,7 +12,7 @@ vite.config.ts.timestamp-*
 
 # Terraform
 .terraform
-*.tfstate
+*.tfstate*
 
 # Firebase Private Key
 firebase-adminsdk.json

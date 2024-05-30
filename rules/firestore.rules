@@ -1,0 +1,61 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // chatsMessages collection:
+    match /chatsMessages/{chatId}/messages/{messageId} {
+      // Allow read and create access if the user is authenticated and is a member of the chat room
+      allow read, create: if request.auth != null && 
+        request.auth.uid in get(/databases/$(database)/documents/chatRooms/$(chatId)).data.members;
+    	
+      // disallow update, delete access for everybody 
+      allow update, delete : if false;
+    }
+    
+    // userEmailToUid collection:
+    match /userEmailToUid/{email} {
+    	// Allow all authenticated users to read this collection
+      allow read: if request.auth != null;
+
+      // Allow create access only if the authenticated user is editing their own entry
+      allow create: if request.auth != null && 
+      		! exists(/databases/$(database)/documents/userEmailToUid/$(email));
+      
+      // disallow update, delete access for everybody 
+      allow update, delete : if false;
+    }
+    
+    // chatRooms collection documents:
+    match /chatRooms/{chatId} {
+      // All authenticated users can create new chats
+      // They can also read chats: required to perform a query to fetch user chats
+      // this however does not expose chat message history
+      allow read, create: if request.auth != null;
+    
+      // All chat members have access update access to the chat document 
+    	allow update: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/chatRooms/$(chatId)).data.members;
+
+      // Disallow deletion of the document
+      allow delete : if false;
+      
+
+    	match /captions/{captionId} {
+        // All chat members should have read and create access
+        // to chat's image captions
+        allow read, create : if request.auth != null &&
+          	request.auth.uid in get(/databases/$(database)/documents/chatRooms/$(chatId)).data.members;
+          
+				allow update, delete : if false;
+			}
+      
+      // memberNames subcollection     
+      match /memberNames/{userId} {
+        // All chat members should have read and create/update access to memberNames
+        allow read, create, update: if request.auth != null &&
+            request.auth.uid in get(/databases/$(database)/documents/chatRooms/$(chatId)).data.members;
+        allow delete: if false;
+      }      
+    }
+  }
+}
