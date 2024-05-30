@@ -1,14 +1,17 @@
 <script>
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { getLoggedInUser, logOutUser, updateUserDisplayName } from '../../database/auth.js';
+	import { getLoggedInUser, updateUserDisplayName } from '../../database/auth.js';
 
 	let user = null;
 	let newUsername = '';
 
 	onMount(() => {
 		user = getLoggedInUser();
-		console.log(user);
+		if (user === null) {
+			// redirect a user if not logged in
+			goto('/login');
+		}
 	});
 
 	async function changeUsername() {
@@ -34,15 +37,15 @@
 				<!-- <label for="new-username">New Username:</label> -->
 
 				<div class="label">Change of username:</div>
-				<div class="input-field2">
+				<form class="input-field2" on:submit|preventDefault={changeUsername}>
 					<input
 						type="text"
 						id="new-username"
 						bind:value={newUsername}
 						placeholder={user.displayName}
 					/>
-					<button on:click={changeUsername}>ok</button>
-				</div>
+					<button type="submit">ok</button>
+				</form>
 			</div>
 		</div>
 	{/if}

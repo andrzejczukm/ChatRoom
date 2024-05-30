@@ -59,7 +59,6 @@ export function subscribeChatMessages(chatId, messageCount, onMessagesCallback) 
 
 					const fileList = await listAll(fileStorageRef);
 					if (fileList.items.length > 0) {
-						console.log(fileList);
 						const fileRef = fileList.items[0];
 						const downloadUrl = await getDownloadURL(fileRef);
 						file = {

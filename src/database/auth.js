@@ -5,7 +5,7 @@ import {
 	updateProfile,
 } from 'firebase/auth';
 import { auth, db } from './config';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 
 /**
  * @typedef UserData

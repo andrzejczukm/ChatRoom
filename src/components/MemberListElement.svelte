@@ -1,6 +1,9 @@
 <script>
+	import { createEventDispatcher } from 'svelte';
 	import { demoteChatMember, promoteChatMember, removeChatMember } from '../database/chats';
 	import ConfirmationDialog from './shared/dialogs/ConfirmationDialog.svelte';
+
+	const dispatch = createEventDispatcher();
 
 	export let isUserAdmin;
 	export let canBeDemoted;
@@ -13,14 +16,17 @@
 
 	async function handlePromote() {
 		await promoteChatMember(chatId, memberId);
+		dispatch('memberChanged');
 	}
 
 	async function handleDemote() {
 		await demoteChatMember(chatId, memberId);
+		dispatch('memberChanged');
 	}
 
 	async function handleRemoveMember() {
 		await removeChatMember(chatId, memberId);
+		dispatch('memberChanged');
 	}
 </script>
 

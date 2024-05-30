@@ -1,37 +1,17 @@
 <script>
 	import { writable } from 'svelte/store';
 	import { getLoggedInUser } from '../../database/auth';
-	import { getRandomFolder, getImageUrlFromFolderRef, getChatName } from '../../database/catalog';
+	import { getCatalogsData } from '../../database/catalog';
 	import { onMount } from 'svelte';
-	import { db } from '../../database/config';
-	import { collection, query, where, getDocs } from 'firebase/firestore';
 	import Spinner from '../../components/shared/Spinner.svelte';
 
-	const chatRoomsCollection = collection(db, 'chatRooms');
 	let user = null;
-	let imageUrls = writable([]); // Array to store image URLs
+	let imageUrls = writable(null); // Array to store image URLs
 
 	onMount(async () => {
-		user = await getLoggedInUser();
+		user = getLoggedInUser();
 		if (user) {
-			const userChatsQuery = query(
-				chatRoomsCollection,
-				where('members', 'array-contains', user.id)
-			);
-			const userChats = await getDocs(userChatsQuery);
-			const urls = [];
-
-			for (const chat of userChats.docs) {
-				const folderRef = await getRandomFolder(chat.id);
-				const chatName = await getChatName(chat.id);
-				if (folderRef) {
-					const url = await getImageUrlFromFolderRef(folderRef);
-					if (url) {
-						urls.push({ imageUrl: url, chatName: chatName, chatId: chat.id }); // Add URL to the temporary array
-					}
-				}
-			}
-
+			const urls = await getCatalogsData(user.id);
 			// Update the writable store with the array of image URLs
 			imageUrls.set(urls);
 		}
@@ -39,9 +19,13 @@
 </script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-{#if $imageUrls.length === 0}
+{#if $imageUrls === null}
 	<div class="spinner-container">
 		<Spinner />
+	</div>
+{:else if $imageUrls.length === 0}
+	<div class="no-chats-info">
+		<p>No catalogs found. Send images in chats to create catalogs</p>
 	</div>
 {:else}
 	<div class="grid-container">
@@ -55,8 +39,8 @@
 					>
 					<a href="catalog/{imageObj.chatId}">
 						<!-- svelte-ignore a11y-structure -->
-						<figcaption>{imageObj.chatName}</figcaption></a
-					>
+						<figcaption><b>{imageObj.chatName}</b></figcaption>
+					</a>
 				</figure>
 			</div>
 		{/each}
@@ -109,5 +93,17 @@
 		display: flex;
 		justify-content: center;
 		padding: 48px 0;
+	}
+
+	.no-chats-info {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		height: 100%;
+		align-items: center;
+		justify-content: center;
+		color: grey;
+		text-align: center;
+		padding: 0 4px;
 	}
 </style>

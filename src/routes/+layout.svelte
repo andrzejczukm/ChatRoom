@@ -1,7 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
 	import '../app.css';
-	import { goto } from '$app/navigation';
 	import { getLoggedInUser, logOutUser } from '../database/auth.js';
 
 	let user = null;
@@ -24,11 +23,10 @@
 			<a href="/about">About</a>
 			<a class="active" href="/chats">Chats</a>
 			<a href="/catalog">Catalogs</a>
+			<a href="/profile">Profile</a>
 			{#if user !== null}
-				<a href="/profile">Profile</a>
-				<button on:click={logOut}>Logout</button>
+				<button on:click={logOut} class="logout-btn">Logout</button>
 			{:else}
-				<a href="/login">Profile</a>
 				<a href="/login">Login</a>
 			{/if}
 		</div>
@@ -46,7 +44,6 @@
 	header {
 		background-color: rgb(235, 235, 235);
 		position: sticky;
-		margin-bottom: 10px;
 	}
 
 	.header-right {
@@ -90,7 +87,8 @@
 		padding: 0;
 	}
 
-	.links a:hover {
+	.links a:hover,
+	.links .logout-btn:hover {
 		color: #709692;
 		/* rgb(117, 117, 117); */
 		transition: background-color 0.3s ease;
@@ -103,6 +101,7 @@
 		position: absolute;
 		bottom: 0;
 		width: 100%;
+		border-top: rgb(235, 235, 235) 1px solid;
 	}
 
 	.footer-content {

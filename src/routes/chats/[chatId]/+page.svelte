@@ -53,8 +53,6 @@
 			const messageTextCopy = `${messageText}`;
 			messageText = '';
 			await sendTextMessage(currentChatId, user.id, user.displayName, messageTextCopy);
-		} else {
-			console.log("Can't sand a blank message!");
 		}
 
 		// send attached file
@@ -270,17 +268,20 @@
 		margin: 0;
 		padding: 2px;
 		font-weight: bold;
+		word-wrap: break-word;
+		word-break: break-word;
 	}
 
-	.strong {
-		font-weight: 100;
+	.message img {
+		max-width: 100%;
+		max-height: 16vw;
 	}
+
 	.message-bubble {
 		margin-bottom: 10px;
 		border-radius: 6px;
 		padding: 5px 0px;
 		height: fit-content;
-		weight: fit-content;
 		color: rgb(0, 0, 0);
 		font-size: 16px;
 		font-weight: 400;
