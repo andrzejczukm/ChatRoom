@@ -101,6 +101,7 @@
 		position: absolute;
 		bottom: 0;
 		width: 100%;
+		border-top: rgb(235, 235, 235) 1px solid;
 	}
 
 	.footer-content {

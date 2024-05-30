@@ -134,23 +134,26 @@ export async function getChatName(chatId) {
 	}
 }
 
-export async function downloadSelected() {
-	const selectedCheckboxes = document.querySelectorAll('.image-checkbox:checked');
-	for (const checkbox of selectedCheckboxes) {
-		const imageUrl = checkbox.getAttribute('image-url');
-		const imageTitle = checkbox.getAttribute('image-title');
+/**
+ * @typedef DownloadImageData
+ * @property {string} downloadUrl
+ * @property {string} desiredFilename
+ *
+ * @param {DownloadImageData[]} selectedImages
+ */
+export async function downloadSelected(selectedImages) {
+	for (const imgData of selectedImages) {
 		try {
-			const url = await getDownloadURL(ref(storage, imageUrl));
 			const xhr = new XMLHttpRequest();
 			xhr.responseType = 'blob';
 			xhr.onload = (event) => {
 				const blob = xhr.response;
-				saveBlob(blob, imageTitle);
+				saveBlob(blob, imgData.desiredFilename);
 			};
 			xhr.onerror = (error) => {
 				console.error('XHR request failed', error);
 			};
-			xhr.open('GET', url);
+			xhr.open('GET', imgData.downloadUrl);
 			xhr.send();
 		} catch (error) {
 			console.error('Error in download', error);
