@@ -68,6 +68,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Login - Holiday Chat Room</title>
+</svelte:head>
+
 {#if displayPage}
 	<div class="auth-container">
 		<div class="form-container">

@@ -1,6 +1,10 @@
 <script>
 </script>
 
+<svelte:head>
+	<title>Holiday Chat Room</title>
+</svelte:head>
+
 <main>
 	<h1>Holiday Chat Room</h1>
 	<p>Your go-to solution for holiday chats and photo organisation</p>

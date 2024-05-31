@@ -25,6 +25,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>My Profile</title>
+</svelte:head>
+
 <div class="container">
 	{#if user !== null}
 		<div class="form">

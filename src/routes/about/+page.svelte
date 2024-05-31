@@ -2,6 +2,10 @@
 	<h1>ABOUT US</h1>
 </div>
 
+<svelte:head>
+	<title>About Holiday Chat Room</title>
+</svelte:head>
+
 <!-- Sekcja z tekstem -->
 <div class="about-section">
 	<p>

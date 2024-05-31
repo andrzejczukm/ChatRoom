@@ -12,4 +12,8 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Catalogs</title>
+</svelte:head>
+
 <slot />
