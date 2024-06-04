@@ -74,7 +74,7 @@ export async function listAllImages(chatId) {
 			let title = imageReference.items[0].name;
 			const extension = title.split('.').pop();
 
-			if (extension === 'png' || extension === 'jpg') {
+			if (extension === 'png' || extension === 'jpg' || extension === 'jpeg') {
 				const url = await getDownloadURL(imageReference.items[0]);
 				const caption = captionsMap.get(subdir.name) ?? 'No caption generated';
 				const urlTitleRefTuple = {
